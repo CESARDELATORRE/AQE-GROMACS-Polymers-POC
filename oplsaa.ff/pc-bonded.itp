@@ -1,0 +1,66 @@
+; Some esoteric OPLS atomtypes are not freely available (or depreciated).
+; Interaction types involving these have been commented out.
+  
+[ bondtypes ]
+; i    j  func       b0          kb
+  CTY   CAX     1    0.15400   265265.6          ; Florian carb bond constraint
+  CTY   HCX     1    0.10900   284512.0          ;
+  CTY   CTX     1    0.15400   224262.4          ; 
+  CTX   HCX     1    0.11000   284512.0          ;
+  CAX   CAX     1    0.13900   392459.2          ;
+  CAX   HAX     1    0.10800   307105.6          ;
+  CAX   OX      1    0.13900   376560.0          ;
+  OX    C_X     1    0.13200   476976.0          ;
+  C_X   OSX     1    0.11800   179075.2          ;
+
+
+[ angletypes ]
+;  i    j    k  func       th0       cth
+  CAX    CTY    CTX     1   109.450    376.600   ; Florian carb paper
+  CAX    CTY    HCX     1   109.500    292.880   ; do
+  CTX    CTY    CTX     1   109.450    376.600   ; do
+  CTX    CTY    HCX     1   110.700    313.800   ; do
+  CTY    CAX    CAX     1   120.000    376.600   ; do
+  CAX    CAX    CAX     1   120.000    376.600   ; do
+  CAX    CAX    HAX     1   120.000    418.800   ; do
+  CAX    CAX    OX      1   120.000    418.800   ; do
+  CTY    CTX    HCX     1   109.450    366.900   ; do
+  HCX    CTX    HCX     1   109.450    306.400   ; do
+  CAX    OX     C_X     1   121.400    418.800   ; do
+  OX     C_X    OSX     1   126.000    418.800   ; do
+  OX     C_X    OX      1   108.000    418.800   ; do
+  CAX    CTY    CAX     1   109.450    376.600   ; do  for trimer
+   
+ 
+  
+[ dihedraltypes ]
+;  i    j    k    l   func     coefficients
+  CAX    CAX    CTY    CTX     3      0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; opls
+  CAX    CTY    CTX    HCX     3      0.96650   2.89951   0.00000  -3.86601   0.00000   0.00000 ; opls
+  CAX    CAX    OX     C_X     3      1.50000   0.0000006 -1.5000  -0.0000035 0.000001  0.0000028  ; Florian DPC paper
+  CAX    OX     C_X    OSX     3      15.0000   0.0000069 -15.000  -0.000035  0.000013  0.000028   ; do
+  OX     C_X    OX     CAX     3      17.0000   2.00001   -15.000  -0.000034   0.0000095 0.0000273 ; do
+  CAX    CAX    CTY    CAX     3      0.000000069  -0.00000036  2  0.00000096  -2  -0.00000071     ; florian BPA paper for trimer
+  HCX    CTX    CTY    CTX     3      0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000
+  CTX    CTY    CTX    HCX     3      0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; hydrocarbon all-atom
+  HCX    CTY    CTX    HCX     3      0.62760   1.88280   0.00000  -2.51040   0.00000   0.00000 ; hydrocarbon *new* 11/99
+  CAX    CAX    CTY    HCX     3      0.00000   0.00000   0.00000   0.00000   0.00000   0.00000 ; ethyl benzene
+  HAX    CAX    CAX    HAX     3      0.0       0.0       0.0       0.0       0.0       0.0
+  CTY    CAX    CAX    HAX     3      0.0       0.0       0.0       0.0       0.0       0.0
+  OX     CAX    CAX    HAX     3      0.0       0.0       0.0       0.0       0.0       0.0
+  CAX    CAX    CAX    CAX     3      0.0       0.0       0.0       0.0       0.0       0.0
+  CAX    CAX    CAX    HAX     3      0.0       0.0       0.0       0.0       0.0       0.0
+  CAX    CAX    CAX    OX      3      0.0       0.0       0.0       0.0       0.0       0.0
+  CAX    CAX    CAX    CTY     3      0.0       0.0       0.0       0.0       0.0       0.0
+
+
+
+
+
+[ dihedraltypes ]
+; benzene ring and carbonate part improper torsion
+#define improper_X_Y_Z_A        180.0     167.400    2 ; Florian Carbonate monomer
+#define improper_Z_CA_X_Y       180.0      4.60240   2 ; From opls for aromactic carbons
+; O?-C -X -Y improper torsion. C can be C_2 or C_3 too.
+#define improper_O_C_X_Y        180.0     43.93200   2
+

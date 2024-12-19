@@ -1,0 +1,40 @@
+codes:
+  - label: gmx
+    description: GROMACS
+    computer: ondemand
+    filepath_executable: gmx_mpi
+    default_calc_job_plugin: core.shell
+    use_double_quotes: false
+    with_mpi: true
+    prepend_text: |
+      . /anfhome/.profile
+      module load gromacs
+
+  - label: gmx-gpu
+    description: GROMACS
+    computer: ondemand
+    filepath_executable: gmx_mpi
+    default_calc_job_plugin: core.shell
+    use_double_quotes: false
+    with_mpi: true
+    prepend_text: |
+      . /anfhome/.profile
+      module load gromacs/cuda-mpi
+      export OMP_NUM_THREADS=${SLURM_CPUS_PER_TASK}
+      export GMX_ENABLE_DIRECT_GPU_COMM=1
+
+computers:
+  - label: ondemand
+    description: Azure HPC OnDemand Platform
+    hostname: ondemand
+    transport: core.ssh
+    scheduler: core.slurm
+    work_dir: /anfhome/{username}/scratch/aiida
+    shebang: '#!/bin/bash'
+    mpirun_command: mpirun -np {tot_num_mpiprocs}
+    use_double_quotes: false
+    configure:
+      compress: true
+      key_policy: AutoAddPolicy
+      safe_interval: 2
+      use_login_shell: false

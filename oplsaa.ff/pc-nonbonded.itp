@@ -1,0 +1,15 @@
+[ atomtypes ]
+; full atom descriptions are available in ffoplsaa.atp
+; name  bond_type    mass    charge   ptype          sigma      epsilon
+
+
+ opls_980   CTX  6       12.01100     0    A    0.350        0.336           ;for making trimer methyl carbon Florian's monocarbonate
+ opls_981   CTY  6     12.01100     0       A    0.3207       0.3519          ;Florian  aliphatic carbon
+ opls_982   HCX  1      1.00800     0       A    0.257        0.210           ;Florian
+ opls_983   CAX  6     12.01100    0       A    0.355        0.294           ;Florian
+ opls_984   HAX  1      1.00800     0       A    0.242        0.126           ;Florian
+ opls_985   OSX  8      15.99940    0      A    0.296        0.880           ;Florian dpc
+ opls_986   C_X   6      12.01100    0       A    0.340        0.360           ;Florian dpc
+ opls_987   OX   8    15.99940    0         A    0.300        0.712           ;Florian dpc
+
+

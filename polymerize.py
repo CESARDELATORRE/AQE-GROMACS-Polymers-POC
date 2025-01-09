@@ -81,7 +81,7 @@ def get_rotation_matrix(vec1: ArrayData, vec2: ArrayData) -> ArrayData:
     # Calculate the angle between vec1 and vec2 and rotation angle to align vec2 to vec1
     dot_product = np.dot(vec1.get_array(), vec2.get_array())
     rotation_angle = np.arccos(dot_product)
-    print('rangle = ', rotation_angle)
+    print('rotation angle = ', rotation_angle)
 
     cos_angle = np.cos(rotation_angle)
     sin_angle = np.sin(rotation_angle)
@@ -124,20 +124,14 @@ class polymerize(WorkChain):
         spec.outline(cls.make_polymer, cls.result)
 
     def make_polymer(self):
-        print('c1')
         monomer_atom_lines = get_atom_lines(self.inputs.monomer.get_content().split('\n'))
-        print('c2')
         monomer_all_atom_list = List()
         for num, line in enumerate(monomer_atom_lines.get_list()):
             monomer_all_atom_list.append(get_atom_dict(Int(num), line))
-        print('c3')
-        print(monomer_all_atom_list.get_list())
-        print('c4')
-
+        
         polymer_all_atom_list = List()
         polymer_remove_atom_index_list = List()
-        print('c5')
-
+        
         # Add monomers to the polymer chain
         polymer_atom_count = 0
         for imonomer in range(self.inputs.monomer_count.value):
@@ -171,12 +165,30 @@ class polymerize(WorkChain):
                 for iatom in monomer_all_atom_list:
                     if iatom['atom_name'] == 'HA3':
                         ha3_index = iatom['atom_number']
+                        break
                 
                 if ha3_index < 0:
                     raise ValueError('HA3 atom is not found.')
 
-                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) \
-                - np.array(monomer_all_atom_list[ha3_index]['coord'])
+                # get the CA of model monomer
+                ca_index = -1
+                for iatom in monomer_all_atom_list:
+                    if iatom['atom_name'] == 'CA':
+                        ca_index = iatom['atom_number']
+                        break
+
+                if ca_index < 0:
+                    raise ValueError('CA atom is not found.')
+
+                # get coordinate of connection point (lies on CA-HA vector with a CA-Connection point distance of 1.58)
+                ca_ha3_unit_vec = \
+                get_unit_vector(ArrayData(np.array(monomer_all_atom_list[ha3_index]['coord'])), \
+                                ArrayData(np.array(monomer_all_atom_list[ca_index]['coord'])))
+                coord = np.array(monomer_all_atom_list[ca_index]['coord']) + ca_ha3_unit_vec.get_array() * 1.58
+
+                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) - coord
+                #dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) \
+                #- np.array(monomer_all_atom_list[ha3_index]['coord'])
 
                 print('p2')
                 # put the next monomer in the polymer + translation

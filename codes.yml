@@ -10,6 +10,17 @@ codes:
       . /anfhome/.profile
       module load gromacs
 
+  - label: gmx
+    description: GROMACS
+    computer: localhost
+    filepath_executable: gmx_mpi
+    default_calc_job_plugin: core.shell
+    use_double_quotes: false
+    with_mpi: true
+    prepend_text: |
+      . /anfhome/.profile
+      module load gromacs
+
   - label: gmx-gpu
     description: GROMACS
     computer: ondemand
@@ -24,6 +35,20 @@ codes:
       export GMX_ENABLE_DIRECT_GPU_COMM=1
 
 computers:
+  - label: localhost
+    description: localhost
+    hostname: localhost
+    transport: core.local
+    scheduler: core.direct
+    work_dir: /anfhome/{username}/scratch/aiida
+    shebang: '#!/bin/bash'
+    mpirun_command: 'mpirun -np 1'
+    default_mpiprocs_per_machine: 1
+    use_double_quotes: false
+    configure:
+      safe_interval: 0
+      use_login_shell: true
+
   - label: ondemand
     description: Azure HPC OnDemand Platform
     hostname: ondemand

@@ -1,5 +1,8 @@
+import os
 import numpy as np
-from aiida.orm import Int, Str, List, Dict, ArrayData, SinglefileData
+import pandas as pd
+
+from aiida.orm import Int, Float, Str, List, Dict, ArrayData, SinglefileData
 from aiida.engine import WorkChain, calcfunction
 
 @calcfunction
@@ -121,6 +124,7 @@ class polymerize(WorkChain):
         spec.input('monomer', valid_type = SinglefileData)
         spec.input('monomer_count', valid_type = Int)
         spec.output('polymer', valid_type = SinglefileData)
+        spec.output('polymer_molecular_weight', valid_type = Float)
         spec.outline(cls.make_polymer, cls.result)
 
     def make_polymer(self):
@@ -151,7 +155,6 @@ class polymerize(WorkChain):
                     polymer_atom_count += 1
             else:
                 # get the CW of last monomer
-                print('p1')
                 cw_index = -1
                 for iatom in polymer_all_atom_list:
                     if iatom['atom_name'] == 'CW':
@@ -190,9 +193,10 @@ class polymerize(WorkChain):
                 #dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) \
                 #- np.array(monomer_all_atom_list[ha3_index]['coord'])
 
-                print('p2')
+                print('p1')
                 # put the next monomer in the polymer + translation
                 for iatom in monomer_all_atom_list:
+                    print(iatom['atom_number'])
                     curratom = copy_atomdict(iatom)
                     curratom = update_atom_number(curratom, Int(polymer_atom_count))
                     curratom = update_residue_seq_num(curratom, Int(imonomer))
@@ -215,7 +219,6 @@ class polymerize(WorkChain):
                     
                     polymer_atom_count += 1
 
-                print('p3')
                 # rotation starts here
                 # CW.coord == HA3.coord
                 # get the CA of last monomer
@@ -244,11 +247,10 @@ class polymerize(WorkChain):
                 get_unit_vector(ArrayData(np.array(polymer_all_atom_list[ca_index]['coord'])), \
                                 ArrayData(np.array(polymer_all_atom_list[cw_index]['coord'])))
 
-                print('p4')
                 rotation_matrix = get_rotation_matrix(cw_hw3_unit_vec, cw_ca_unit_vec)
 
-                print('p5')
                 for index, iatom in enumerate(polymer_all_atom_list):
+                    print(iatom['atom_number'])
                     if iatom['residue_seq_num'] == imonomer and iatom['atom_name'] != '':
                         coord = rotate_coord(ArrayData(np.array(iatom['coord'])), \
                                              ArrayData(np.array(polymer_all_atom_list[ca_index]['coord'])), \
@@ -256,11 +258,19 @@ class polymerize(WorkChain):
                         polymer_all_atom_list[index] = update_coord(polymer_all_atom_list[index], coord)
             print('Done ', imonomer)
         polymer_all_atom_lines = List()
+        
+        self.ctx.polymer_molecular_weight = Float(0.0)
+        dataframe_elements = pd.read_csv(os.getcwd() + '/elements.csv', index_col = None)
+        
         for iatom in polymer_all_atom_list:
             if iatom['atom_number'] not in polymer_remove_atom_index_list.get_list():
+                self.ctx.polymer_molecular_weight += \
+                Float(dataframe_elements.loc[dataframe_elements['Symbol'] == \
+                      iatom['element'], 'AtomicMass'].iloc[0])
                 polymer_all_atom_lines.append(get_pdbstr(iatom).value)
                 print(get_pdbstr(iatom).value)
         self.ctx.polymer = SinglefileData.from_string('\n'.join(polymer_all_atom_lines), filename='polymer.pdb')
 
     def result(self):
         self.out('polymer', self.ctx.polymer)
+        self.out('polymer_molecular_weight', self.ctx.polymer_molecular_weight)

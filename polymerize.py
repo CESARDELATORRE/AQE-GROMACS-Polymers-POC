@@ -84,7 +84,7 @@ def get_rotation_matrix(vec1: ArrayData, vec2: ArrayData) -> ArrayData:
     # Calculate the angle between vec1 and vec2 and rotation angle to align vec2 to vec1
     dot_product = np.dot(vec1.get_array(), vec2.get_array())
     rotation_angle = np.arccos(dot_product)
-    print('rotation angle = ', rotation_angle)
+    #print('rotation angle = ', rotation_angle)
 
     cos_angle = np.cos(rotation_angle)
     sin_angle = np.sin(rotation_angle)
@@ -138,8 +138,10 @@ class polymerize(WorkChain):
         
         # Add monomers to the polymer chain
         polymer_atom_count = 0
+        print('Polymerization starts ->')
         for imonomer in range(self.inputs.monomer_count.value):
-            print('Start ', imonomer)
+            print(imonomer+1, end='\r')
+            #print('Start ', imonomer)
             monomer_atom_count = len(monomer_all_atom_list)
             # first monomer
             if imonomer == 0:
@@ -193,10 +195,10 @@ class polymerize(WorkChain):
                 #dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) \
                 #- np.array(monomer_all_atom_list[ha3_index]['coord'])
 
-                print('p1')
+                #print('p1')
                 # put the next monomer in the polymer + translation
                 for iatom in monomer_all_atom_list:
-                    print(iatom['atom_number'])
+                    #print(iatom['atom_number'])
                     curratom = copy_atomdict(iatom)
                     curratom = update_atom_number(curratom, Int(polymer_atom_count))
                     curratom = update_residue_seq_num(curratom, Int(imonomer))
@@ -250,18 +252,19 @@ class polymerize(WorkChain):
                 rotation_matrix = get_rotation_matrix(cw_hw3_unit_vec, cw_ca_unit_vec)
 
                 for index, iatom in enumerate(polymer_all_atom_list):
-                    print(iatom['atom_number'])
+                    #print(iatom['atom_number'])
                     if iatom['residue_seq_num'] == imonomer and iatom['atom_name'] != '':
                         coord = rotate_coord(ArrayData(np.array(iatom['coord'])), \
                                              ArrayData(np.array(polymer_all_atom_list[ca_index]['coord'])), \
                                              rotation_matrix).get_array().tolist()
                         polymer_all_atom_list[index] = update_coord(polymer_all_atom_list[index], coord)
-            print('Done ', imonomer)
+            #print('Done ', imonomer)
         polymer_all_atom_lines = List()
         
         self.ctx.polymer_molecular_weight = Float(0.0)
         dataframe_elements = pd.read_csv(os.getcwd() + '/elements.csv', index_col = None)
-        
+
+        print('')
         for iatom in polymer_all_atom_list:
             if iatom['atom_number'] not in polymer_remove_atom_index_list.get_list():
                 self.ctx.polymer_molecular_weight += \

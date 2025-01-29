@@ -152,36 +152,6 @@ class PolymerizeWorkChain(WorkChain):
         ha3_atom_name = self.inputs.last_bond_and_first_bond.get_list()[2]
         ca_atom_name = self.inputs.last_bond_and_first_bond.get_list()[3]
         #print(cw_atom_name, hw3_atom_name, ha3_atom_name, ca_atom_name)
-
-        # get the HA3 of model monomer
-        ha3_index = -1
-        for iatom in monomer_all_atom_list:
-            if iatom['atom_name'] == ha3_atom_name:
-                ha3_index = iatom['atom_number']
-                break
-        
-        if ha3_index < 0:
-            raise ValueError('HA3 atom is not found.')
-
-        # get the CA of model monomer
-        ca_index = -1
-        for iatom in monomer_all_atom_list:
-            if iatom['atom_name'] == ca_atom_name:
-                ca_index = iatom['atom_number']
-                break
-
-        if ca_index < 0:
-            raise ValueError('CA atom is not found.')
-
-        # get coordinate of connection point (lies on CA-HA3 vector with a CA-Connection point distance of 1.58)
-        vec1 = ArrayData()
-        vec1.set_array('vec', np.array(monomer_all_atom_list[ha3_index]['coord']))
-        vec2 = ArrayData()
-        vec2.set_array('vec', np.array(monomer_all_atom_list[ca_index]['coord']))
-        ca_ha3_unit_vec = get_unit_vector(vec1, vec2)
-        ha3_coord = np.array(monomer_all_atom_list[ca_index]['coord']) + ca_ha3_unit_vec.get_array('vec') * 1.58
-
-        #print(monomer_all_atom_list[ha3_index]['coord'], monomer_all_atom_list[ca_index]['coord'], ha3_coord)
         
         # Add monomers to the polymer chain
         polymer_atom_count = 0
@@ -211,11 +181,40 @@ class PolymerizeWorkChain(WorkChain):
 
                 if cw_index < 0:
                     raise ValueError('CW atom is not found.')
+        
+                # get the HA3 of model monomer
+                ha3_index = -1
+                for iatom in monomer_all_atom_list:
+                    if iatom['atom_name'] == ha3_atom_name:
+                        ha3_index = iatom['atom_number']
+                        break
+                
+                if ha3_index < 0:
+                    raise ValueError('HA3 atom is not found.')
 
-                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) - ha3_coord
+                # get the CA of model monomer
+                ca_index = -1
+                for iatom in monomer_all_atom_list:
+                    if iatom['atom_name'] == ca_atom_name:
+                        ca_index = iatom['atom_number']
+                        break
+
+                if ca_index < 0:
+                    raise ValueError('CA atom is not found.')
+
+                # get coordinate of connection point (lies on CA-HA3 vector with a CA-Connection point distance of 1.58)
+                vec1 = ArrayData()
+                vec1.set_array('vec', np.array(monomer_all_atom_list[ha3_index]['coord']))
+                vec2 = ArrayData()
+                vec2.set_array('vec', np.array(monomer_all_atom_list[ca_index]['coord']))
+                ca_ha3_unit_vec = get_unit_vector(vec1, vec2)
+                coord = np.array(monomer_all_atom_list[ca_index]['coord']) + ca_ha3_unit_vec.get_array('vec') * 1.58
+
+                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) - coord
 
                 # put the next monomer in the polymer + translation
                 for iatom in monomer_all_atom_list:
+                    print(iatom['atom_number'])
                     curratom = copy_atomdict(iatom)
                     curratom = update_atom_number(curratom, Int(polymer_atom_count))
                     curratom = update_residue_seq_num(curratom, Int(imonomer))
@@ -238,9 +237,9 @@ class PolymerizeWorkChain(WorkChain):
                     
                     polymer_atom_count += 1
 
-                #for iatom in polymer_all_atom_list:
-                #    print(get_pdbstr(iatom).value)
-                #print('before rotate')
+                for iatom in polymer_all_atom_list:
+                    print(get_pdbstr(iatom).value)
+                print('before rotate')
 
                 # rotation starts here
                 # CW.coord == HA3.coord

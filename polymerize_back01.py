@@ -73,19 +73,16 @@ def get_pdbstr(curratom_dict: Dict) -> Str:
 @calcfunction
 def get_unit_vector(p1: ArrayData, p2: ArrayData) -> ArrayData:
 
-    vec = p1.get_array('vec') - p2.get_array('vec')
+    vec = p1.get_array() - p2.get_array()
     vec /= np.linalg.norm(vec)
 
-    res = ArrayData()
-    res.set_array('vec', vec)
-
-    return res
+    return ArrayData(vec)
 
 @calcfunction
 def get_rotation_matrix(vec1: ArrayData, vec2: ArrayData) -> ArrayData:
 
     # Calculate the angle between vec1 and vec2 and rotation angle to align vec2 to vec1
-    dot_product = np.dot(vec1.get_array('vec'), vec2.get_array('vec'))
+    dot_product = np.dot(vec1.get_array(), vec2.get_array())
     rotation_angle = np.arccos(dot_product)
     #print('rotation angle = ', rotation_angle)
 
@@ -93,7 +90,7 @@ def get_rotation_matrix(vec1: ArrayData, vec2: ArrayData) -> ArrayData:
     sin_angle = np.sin(rotation_angle)
     
     # Calculate the rotation axis (cross product)
-    rotation_axis = np.cross(vec1.get_array('vec'), vec2.get_array('vec'))
+    rotation_axis = np.cross(vec1.get_array(), vec2.get_array())
     rotation_axis /= np.linalg.norm(rotation_axis)
 
     rotation_matrix = np.array([
@@ -107,23 +104,17 @@ def get_rotation_matrix(vec1: ArrayData, vec2: ArrayData) -> ArrayData:
         rotation_axis[2] * rotation_axis[1] * (1 - cos_angle) + rotation_axis[0] * sin_angle, 
         cos_angle + rotation_axis[2] * rotation_axis[2] * (1 - cos_angle)]
     ])
-
-    res = ArrayData()
-    res.set_array('vec', rotation_matrix)
-    return res
+    return ArrayData(rotation_matrix)
 
 @calcfunction
 def rotate_coord(atom_coord: ArrayData, ref_coord: ArrayData, rotation_matrix: ArrayData) -> ArrayData:
 
-    ref_atom_vec = atom_coord.get_array('vec') - ref_coord.get_array('vec')
+    ref_atom_vec = atom_coord.get_array() - ref_coord.get_array()
     
-    rotated_coord_vec = np.dot(rotation_matrix.get_array('vec'), ref_atom_vec)
-    new_atom_coord = ref_coord.get_array('vec') + rotated_coord_vec
+    rotated_coord_vec = np.dot(rotation_matrix.get_array(), ref_atom_vec)
+    new_atom_coord = ref_coord.get_array() + rotated_coord_vec
 
-    res = ArrayData()
-    res.set_array('vec', new_atom_coord)
-
-    return res
+    return ArrayData(new_atom_coord)
     
 class PolymerizeWorkChain(WorkChain):
 
@@ -131,7 +122,6 @@ class PolymerizeWorkChain(WorkChain):
     def define(cls, spec):
         super().define(spec)
         spec.input('monomer', valid_type = SinglefileData)
-        spec.input('last_bond_and_first_bond', valid_type = List)
         spec.input('monomer_count', valid_type = Int)
         spec.output('polymer', valid_type = SinglefileData)
         spec.output('polymer_molecular_weight', valid_type = Float)
@@ -145,47 +135,10 @@ class PolymerizeWorkChain(WorkChain):
         
         polymer_all_atom_list = List()
         polymer_remove_atom_index_list = List()
-
-        #['CW', 'HW3', 'HA3', 'CA'] (check ppt)
-        cw_atom_name = self.inputs.last_bond_and_first_bond.get_list()[0]
-        hw3_atom_name = self.inputs.last_bond_and_first_bond.get_list()[1]
-        ha3_atom_name = self.inputs.last_bond_and_first_bond.get_list()[2]
-        ca_atom_name = self.inputs.last_bond_and_first_bond.get_list()[3]
-        #print(cw_atom_name, hw3_atom_name, ha3_atom_name, ca_atom_name)
-
-        # get the HA3 of model monomer
-        ha3_index = -1
-        for iatom in monomer_all_atom_list:
-            if iatom['atom_name'] == ha3_atom_name:
-                ha3_index = iatom['atom_number']
-                break
-        
-        if ha3_index < 0:
-            raise ValueError('HA3 atom is not found.')
-
-        # get the CA of model monomer
-        ca_index = -1
-        for iatom in monomer_all_atom_list:
-            if iatom['atom_name'] == ca_atom_name:
-                ca_index = iatom['atom_number']
-                break
-
-        if ca_index < 0:
-            raise ValueError('CA atom is not found.')
-
-        # get coordinate of connection point (lies on CA-HA3 vector with a CA-Connection point distance of 1.58)
-        vec1 = ArrayData()
-        vec1.set_array('vec', np.array(monomer_all_atom_list[ha3_index]['coord']))
-        vec2 = ArrayData()
-        vec2.set_array('vec', np.array(monomer_all_atom_list[ca_index]['coord']))
-        ca_ha3_unit_vec = get_unit_vector(vec1, vec2)
-        ha3_coord = np.array(monomer_all_atom_list[ca_index]['coord']) + ca_ha3_unit_vec.get_array('vec') * 1.58
-
-        #print(monomer_all_atom_list[ha3_index]['coord'], monomer_all_atom_list[ca_index]['coord'], ha3_coord)
         
         # Add monomers to the polymer chain
         polymer_atom_count = 0
-        print(f'Polymerization starts for {self.inputs.monomer.filename} ->')
+        print('Polymerization starts ->')
         for imonomer in range(self.inputs.monomer_count.value):
             print(imonomer+1, end='\r')
             #print('Start ', imonomer)
@@ -199,23 +152,53 @@ class PolymerizeWorkChain(WorkChain):
                     
                     polymer_all_atom_list.append(curratom)
                     
-                    if iatom['atom_name'] == hw3_atom_name:
+                    if iatom['atom_name'] == 'HW3':
                         polymer_remove_atom_index_list.append(polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_number'])
                     polymer_atom_count += 1
             else:
                 # get the CW of last monomer
                 cw_index = -1
                 for iatom in polymer_all_atom_list:
-                    if iatom['atom_name'] == cw_atom_name:
+                    if iatom['atom_name'] == 'CW':
                         cw_index = iatom['atom_number']
 
                 if cw_index < 0:
                     raise ValueError('CW atom is not found.')
+        
+                # get the HA3 of model monomer
+                ha3_index = -1
+                for iatom in monomer_all_atom_list:
+                    if iatom['atom_name'] == 'HA3':
+                        ha3_index = iatom['atom_number']
+                        break
+                
+                if ha3_index < 0:
+                    raise ValueError('HA3 atom is not found.')
 
-                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) - ha3_coord
+                # get the CA of model monomer
+                ca_index = -1
+                for iatom in monomer_all_atom_list:
+                    if iatom['atom_name'] == 'CA':
+                        ca_index = iatom['atom_number']
+                        break
 
+                if ca_index < 0:
+                    raise ValueError('CA atom is not found.')
+
+                # get coordinate of connection point (lies on CA-HA vector with a CA-Connection point distance of 1.58)
+                ca_ha3_unit_vec = \
+                get_unit_vector(ArrayData(np.array(monomer_all_atom_list[ha3_index]['coord'])), \
+                                ArrayData(np.array(monomer_all_atom_list[ca_index]['coord'])))
+                coord = np.array(monomer_all_atom_list[ca_index]['coord']) + ca_ha3_unit_vec.get_array() * 1.58
+
+                dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) - coord
+                #dtranslate = np.array(polymer_all_atom_list[cw_index]['coord']) \
+                #- np.array(monomer_all_atom_list[ha3_index]['coord'])
+
+                #print('p1')
                 # put the next monomer in the polymer + translation
                 for iatom in monomer_all_atom_list:
+                    #print(iatom['atom_number'])
                     curratom = copy_atomdict(iatom)
                     curratom = update_atom_number(curratom, Int(polymer_atom_count))
                     curratom = update_residue_seq_num(curratom, Int(imonomer))
@@ -229,25 +212,21 @@ class PolymerizeWorkChain(WorkChain):
                         curratom = update_residue_name(curratom, Str(iatom['residue_name'][:-1] + '3'))
             
                     polymer_all_atom_list.append(curratom)
-
-                    if polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_name'] == ha3_atom_name:
+                    
+                    if polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_name'] == 'HA3':
                         polymer_remove_atom_index_list.append(polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_number'])
-                    elif polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_name'] == hw3_atom_name:
+                    elif polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_name'] == 'HW3':
                         if polymer_all_atom_list[len(polymer_all_atom_list)-1]['residue_seq_num'] != self.inputs.monomer_count.value - 1:
                             polymer_remove_atom_index_list.append(polymer_all_atom_list[len(polymer_all_atom_list)-1]['atom_number'])
                     
                     polymer_atom_count += 1
-
-                #for iatom in polymer_all_atom_list:
-                #    print(get_pdbstr(iatom).value)
-                #print('before rotate')
 
                 # rotation starts here
                 # CW.coord == HA3.coord
                 # get the CA of last monomer
                 ca_index = -1
                 for iatom in polymer_all_atom_list:
-                    if iatom['atom_name'] == ca_atom_name:
+                    if iatom['atom_name'] == 'CA':
                         ca_index = iatom['atom_number']
                         
                 if ca_index < 0:
@@ -256,34 +235,28 @@ class PolymerizeWorkChain(WorkChain):
                 # get the HW3 of previous monomer
                 hw3_index = -1
                 for iatom in polymer_all_atom_list:
-                    if iatom['atom_name'] == hw3_atom_name and iatom['residue_seq_num'] == imonomer - 1:
+                    if iatom['atom_name'] == 'HW3' and iatom['residue_seq_num'] == imonomer - 1:
                         hw3_index = iatom['atom_number']
                         
                 if hw3_index < 0:
                     raise ValueError('HW3 atom is not found.')
 
-                vec1 = ArrayData()
-                vec1.set_array('vec', np.array(polymer_all_atom_list[hw3_index]['coord']))
-                vec2 = ArrayData()
-                vec2.set_array('vec', np.array(polymer_all_atom_list[cw_index]['coord']))
-                cw_hw3_unit_vec = get_unit_vector(vec1, vec2)
+                cw_hw3_unit_vec = \
+                get_unit_vector(ArrayData(np.array(polymer_all_atom_list[hw3_index]['coord'])), \
+                                ArrayData(np.array(polymer_all_atom_list[cw_index]['coord'])))
+        
+                cw_ca_unit_vec = \
+                get_unit_vector(ArrayData(np.array(polymer_all_atom_list[ca_index]['coord'])), \
+                                ArrayData(np.array(polymer_all_atom_list[cw_index]['coord'])))
 
-                vec1 = ArrayData()
-                vec1.set_array('vec', np.array(polymer_all_atom_list[ca_index]['coord']))
-                vec2 = ArrayData()
-                vec2.set_array('vec', np.array(polymer_all_atom_list[cw_index]['coord']))
-                cw_ca_unit_vec = get_unit_vector(vec1, vec2)
-                
                 rotation_matrix = get_rotation_matrix(cw_hw3_unit_vec, cw_ca_unit_vec)
 
                 for index, iatom in enumerate(polymer_all_atom_list):
                     #print(iatom['atom_number'])
                     if iatom['residue_seq_num'] == imonomer and iatom['atom_name'] != '':
-                        vec1 = ArrayData()
-                        vec1.set_array('vec', np.array(iatom['coord']))
-                        vec2 = ArrayData()
-                        vec2.set_array('vec', np.array(polymer_all_atom_list[ca_index]['coord']))
-                        coord = rotate_coord(vec1, vec2, rotation_matrix).get_array('vec').tolist()
+                        coord = rotate_coord(ArrayData(np.array(iatom['coord'])), \
+                                             ArrayData(np.array(polymer_all_atom_list[ca_index]['coord'])), \
+                                             rotation_matrix).get_array().tolist()
                         polymer_all_atom_list[index] = update_coord(polymer_all_atom_list[index], coord)
             #print('Done ', imonomer)
         polymer_all_atom_lines = List()

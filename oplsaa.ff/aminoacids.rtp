@@ -1664,6 +1664,63 @@ HD23    opls_140     0.060      1
  CW HW2
  CW HW3
 
+[ VA1 ] ; Starting unit of Polyvinylalcohol
+ [ atoms ]
+ CA  opls_135    -0.180  1
+ HA1 opls_140     0.06   2
+ HA2 opls_140     0.06   3
+ HA3 opls_140     0.06   4
+ CB  opls_158     0.205  5
+ HB1 opls_140     0.06   6
+ OH  opls_154    -0.683  7
+ HO  opls_155     0.418  8
+ [ bonds ]
+ CA HA1
+ CA HA2
+ CA HA3
+ CA CB
+ CB HB1
+ CB OH
+ OH HO
+
+[ VA2 ] ; Repeating unit of Polyvinylalcohol
+ [ atoms ]
+ CA  opls_136    -0.120  1
+ HA1 opls_140     0.06   2
+ HA2 opls_140     0.06   3
+ CB  opls_158     0.205  4
+ HB1 opls_140     0.06   5
+ OH  opls_154    -0.683  6
+ HO  opls_155     0.418  7
+ [ bonds ]
+ CA -CB
+ CA HA1
+ CA HA2
+ CA CB
+ CB HB1
+ CB OH
+ OH HO
+
+[ VA3 ] ; End unit of Polyvinylalcohol
+ [ atoms ]
+ CA  opls_136    -0.120  1
+ HA1 opls_140     0.06   2
+ HA2 opls_140     0.06   3
+ CB  opls_158     0.145  4
+ HB1 opls_140     0.06   5
+ HB2 opls_140     0.06   6
+ OH  opls_154    -0.683  7
+ HO  opls_155     0.418  8
+ [ bonds ]
+ CA -CB
+ CA HA1
+ CA HA2
+ CA CB
+ CB HB1
+ CB HB2
+ CB OH
+ OH HO
+
 [ IP1 ]   ; Starting unit of 1,4-polyisoprene 
  [ atoms ]
  CA  opls_135  -0.180  1

@@ -42,7 +42,7 @@ computers:
     scheduler: core.direct
     work_dir: /anfhome/{username}/scratch/aiida
     shebang: '#!/bin/bash'
-    mpirun_command: 'mpirun -np 1'
+    mpirun_command: 'mpirun -np 8'
     default_mpiprocs_per_machine: 1
     use_double_quotes: false
     configure:

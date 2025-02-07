@@ -1,7 +1,4 @@
-#import os
-#import numpy as np
-
-from aiida.orm import Int, Float, Bool, SinglefileData # Int, Str, List, Dict, ArrayData, SinglefileData
+from aiida.orm import Int, Float, Bool, SinglefileData
 from aiida.engine import calcfunction
 
 #@calcfunction
@@ -63,7 +60,12 @@ def get_em_mdp() -> SinglefileData:
         )
 
 @calcfunction
-def set_mdp_parameter(id: Int=Int(0), thermo_T: Float=Float(298.15), thermo_P: Float=Float(1.0)) -> SinglefileData:
+def get_npt_mdp(id: Int = None, thermo_T: Float = None, thermo_P: Float = None) -> SinglefileData:
+    
+    id = id if id is not None else Int(0)
+    thermo_T = thermo_T if thermo_T is not None else Float(298.15)
+    thermo_P = thermo_P if thermo_P is not None else Float(1.0)
+    
     mdp_str = f"""
         title                   = NPT Equilibration
         ;define                 = -DPOSRES

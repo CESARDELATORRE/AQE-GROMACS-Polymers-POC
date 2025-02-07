@@ -1,7 +1,7 @@
 from aiida.orm import Int, Float, Bool, SinglefileData
 from aiida.engine import calcfunction
 
-#@calcfunction
+@calcfunction
 def calc_simulation_box_length(molecular_weight_polymer: Float, polymer_count: Int) -> Float:
     molecular_weight = molecular_weight_polymer.value * polymer_count.value
     
@@ -60,7 +60,12 @@ def get_em_mdp() -> SinglefileData:
         )
 
 @calcfunction
-def get_npt_mdp(id: Int=Int(0), thermo_T: Float=Float(298.15), thermo_P: Float=Float(1.0)) -> SinglefileData:
+def get_npt_mdp(id: Int = None, thermo_T: Float = None, thermo_P: Float = None) -> SinglefileData:
+    
+    id = id if id is not None else Int(0)
+    thermo_T = thermo_T if thermo_T is not None else Float(298.15)
+    thermo_P = thermo_P if thermo_P is not None else Float(1.0)
+    
     mdp_str = f"""
         title                   = NPT Equilibration
         ;define                 = -DPOSRES

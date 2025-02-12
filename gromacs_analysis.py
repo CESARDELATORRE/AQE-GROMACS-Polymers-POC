@@ -39,15 +39,25 @@ plt.rcParams.update({
 })
 
 @calcfunction
+def get_average_property(result: SinglefileData, property_list: List) -> List:
+    result_lines = result.get_content().split('\n')
+
+    property_line_list = [line for line in result_lines if len(line.split()) > 0 and line.split()[0] in property_list.get_list()]
+    
+    average_property_list = List([])
+    for line in property_line_list:
+        wordlist = line.split()
+        average_property_list.append([wordlist[0], wordlist[1], wordlist[5]])
+    return average_property_list
+
+@calcfunction
 def create_time_plot(xvg: SinglefileData) -> List:
     xvg_lines = xvg.get_content().split('\n')
 
     head_lines = [line for line in xvg_lines if line.startswith('@')]
-    plt.title('GROMACS Properties')
     
     xaxis_label_str = [re.search(r'"(.*?)"', line).group(1) for line in head_lines if line.split()[1] == 'xaxis']
     xaxis_label_list = [word for word in xaxis_label_str[0].split(', ')]
-    plt.xlabel(f'{xaxis_label_list[0]}')
     
     yaxis_label_str = [re.search(r'"(.*?)"', line).group(1) for line in head_lines if line.split()[1] == 'yaxis']
     yaxis_label_list = [word for word in yaxis_label_str[0].split(', ')]
@@ -61,7 +71,9 @@ def create_time_plot(xvg: SinglefileData) -> List:
         
     plot = List([])
     for iplot in range(len(data)-1):
-        #print('plotting -> ', iplot)
+        print('plotting -> ', iplot)
+        plt.title('GROMACS Properties')
+        plt.xlabel(f'{xaxis_label_list[0]}')
         plt.ylabel(f'{yaxis_legend_str[iplot]} {yaxis_label_list[iplot]}')
         plt.plot(data[0], data[iplot+1])
         plt.tight_layout()
@@ -69,3 +81,22 @@ def create_time_plot(xvg: SinglefileData) -> List:
         plt.clf()
         plot.append(f'{os.getcwd()}/time_plot_{iplot}.png')
     return plot
+
+@calcfunction
+def create_tg_plot(thermo_T_list: List, average_property_list: List) -> List:
+    density_list = List([])
+    for iproperty in average_property_list.get_list():
+        density_list.append(float(iproperty[0][1]))
+    
+    plot = List([])
+    plt.title('Temperature vs Density')
+    plt.xlabel('Temperature (K)')
+    plt.ylabel(f'{average_property_list.get_list()[0][0][0]} {average_property_list.get_list()[0][0][2]}')
+    plt.plot(thermo_T_list.get_list(), density_list.get_list())
+    plt.tight_layout()
+    plt.savefig(f'{os.getcwd()}/tg_plot.png', format='png', bbox_inches='tight', dpi=150)
+    plt.clf()
+    plot.append(f'{os.getcwd()}/tg_plot.png')
+
+    return plot
+    

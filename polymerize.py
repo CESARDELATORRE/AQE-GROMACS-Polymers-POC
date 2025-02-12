@@ -131,7 +131,7 @@ class PolymerizeWorkChain(WorkChain):
     def define(cls, spec):
         super().define(spec)
         spec.input('monomer', valid_type = SinglefileData)
-        spec.input('last_bond_and_first_bond', valid_type = List)
+        spec.input('polymer_connection_point_list', valid_type = List)
         spec.input('monomer_count', valid_type = Int)
         spec.output('polymer', valid_type = SinglefileData)
         spec.output('polymer_molecular_weight', valid_type = Float)
@@ -146,11 +146,11 @@ class PolymerizeWorkChain(WorkChain):
         polymer_all_atom_list = List()
         polymer_remove_atom_index_list = List()
 
-        #['CW', 'HW3', 'HA3', 'CA'] (check ppt)
-        cw_atom_name = self.inputs.last_bond_and_first_bond.get_list()[0]
-        hw3_atom_name = self.inputs.last_bond_and_first_bond.get_list()[1]
-        ha3_atom_name = self.inputs.last_bond_and_first_bond.get_list()[2]
-        ca_atom_name = self.inputs.last_bond_and_first_bond.get_list()[3]
+        #['CW', 'HW3', 'HA3', 'CA']
+        cw_atom_name = self.inputs.polymer_connection_point_list.get_list()[0]
+        hw3_atom_name = self.inputs.polymer_connection_point_list.get_list()[1]
+        ha3_atom_name = self.inputs.polymer_connection_point_list.get_list()[2]
+        ca_atom_name = self.inputs.polymer_connection_point_list.get_list()[3]
         #print(cw_atom_name, hw3_atom_name, ha3_atom_name, ca_atom_name)
 
         # get the HA3 of model monomer
@@ -282,13 +282,14 @@ class PolymerizeWorkChain(WorkChain):
         dataframe_elements = pd.read_csv(os.getcwd() + '/elements.csv', index_col = None)
 
         print('')
+        #print('remove = ', polymer_remove_atom_index_list.get_list())
         for iatom in polymer_all_atom_list:
             if iatom['atom_number'] not in polymer_remove_atom_index_list.get_list():
                 self.ctx.polymer_molecular_weight += \
                 Float(dataframe_elements.loc[dataframe_elements['Symbol'] == \
                       iatom['element'], 'AtomicMass'].iloc[0])
                 polymer_all_atom_lines.append(get_pdbstr(iatom).value)
-                #print(get_pdbstr(iatom).value)
+                print(get_pdbstr(iatom).value)
         self.ctx.polymer = SinglefileData.from_string('\n'.join(polymer_all_atom_lines), filename='polymer.pdb')
 
     def result(self):

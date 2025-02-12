@@ -1,7 +1,7 @@
 from aiida.orm import Int, Float, Bool, SinglefileData
 from aiida.engine import calcfunction
 
-#@calcfunction
+@calcfunction
 def calc_simulation_box_length(molecular_weight_polymer: Float, polymer_count: Int) -> Float:
     molecular_weight = molecular_weight_polymer.value * polymer_count.value
     
@@ -60,18 +60,18 @@ def get_em_mdp() -> SinglefileData:
         )
 
 @calcfunction
-def get_npt_mdp(id: Int = None, thermo_T: Float = None, thermo_P: Float = None) -> SinglefileData:
+def get_npt_mdp(id: Int = None, Temperature: Float = None, Pressure: Float = None) -> SinglefileData:
     
     id = id if id is not None else Int(0)
-    thermo_T = thermo_T if thermo_T is not None else Float(298.15)
-    thermo_P = thermo_P if thermo_P is not None else Float(1.0)
+    Temperature = Temperature if Temperature is not None else Float(298.15)
+    Pressure = Pressure if Pressure is not None else Float(1.0)
     
     mdp_str = f"""
         title                   = NPT Equilibration
         ;define                 = -DPOSRES
         integrator              = md
         dt                      = 0.002
-        nsteps                  = 50000
+        nsteps                  = 5000
         nstenergy               = 2000
         nstxout-compressed      = 10000
         nstvout                 = 0
@@ -96,11 +96,11 @@ def get_npt_mdp(id: Int = None, thermo_T: Float = None, thermo_P: Float = None) 
         lincs_order             = 4
         tcoupl                  = v-rescale
         tc-grps                 = System
-        ref_t                   = {thermo_T.value}
+        ref_t                   = {Temperature.value}
         tau_t                   = 0.1
         pcoupl                  = c-rescale
         pcoupltype              = isotropic
-        ref_p                   = {thermo_P.value}
+        ref_p                   = {Pressure.value}
         tau_p                   = 2.0
         ;refcoord-scaling        = com
         compressibility         = 4.5e-5

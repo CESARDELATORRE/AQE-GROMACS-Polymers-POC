@@ -1,4 +1,4 @@
-from aiida.orm import Int, Float, Bool, SinglefileData
+from aiida.orm import Int, Float, Bool, Str, List, SinglefileData
 from aiida.engine import calcfunction
 
 @calcfunction
@@ -21,6 +21,36 @@ def calc_simulation_box_length(molecular_weight_polymer: Float, polymer_count: I
     box_length = box_length * cm_to_nm  # nm
 
     return Float(box_length)
+
+@calcfunction
+def get_polymer_name(monomerfname: Str) -> Str:
+    return Str(monomerfname.value.replace('Monomer.pdb', ''))
+
+@calcfunction
+def convert_top_to_itp(top: SinglefileData, filename: Str) -> SinglefileData:
+    lines = top.get_content().split('\n')
+    itp_lines = []
+    write = False
+    for line in lines:
+        if line.startswith('[ moleculetype ]'):
+            write = True
+
+        if write:
+            if line.startswith('; Include water topology'):
+                write = False
+                break
+            else:
+                if line.startswith('Other'):
+                    line = line.replace('Other', f'{filename.value[:-4]}')
+                itp_lines.append(line)
+    return SinglefileData.from_string('\n'.join(itp_lines), filename=filename)
+
+# This will only work for binary blend of polymers
+@calcfunction
+def get_polymer_count(total_polymer_count: Int, first_polymer_wt_perc: Float, mw_list: List) -> List:
+    polymer_count_1 = (first_polymer_wt_perc.value * total_polymer_count.value * mw_list.get_list()[1]) / (100 * mw_list.get_list()[1] + (mw_list.get_list()[1] - mw_list.get_list()[0]) * first_polymer_wt_perc.value)
+    polymer_count_2 = total_polymer_count.value - int(polymer_count_1)
+    return List([int(polymer_count_1), int(polymer_count_2)])
 
 @calcfunction
 def check_insert_molecules(log: SinglefileData, polymer_count: Int) -> Bool:
@@ -60,18 +90,18 @@ def get_em_mdp() -> SinglefileData:
         )
 
 @calcfunction
-def get_npt_mdp(id: Int = None, Temperature: Float = None, Pressure: Float = None) -> SinglefileData:
+def get_npt_mdp(id: Int = None, temperature: Float = None, pressure: Float = None) -> SinglefileData:
     
     id = id if id is not None else Int(0)
-    Temperature = Temperature if Temperature is not None else Float(298.15)
-    Pressure = Pressure if Pressure is not None else Float(1.0)
+    temperature = temperature if temperature is not None else Float(298.15)
+    pressure = pressure if pressure is not None else Float(1.0)
     
     mdp_str = f"""
         title                   = NPT Equilibration
         ;define                 = -DPOSRES
         integrator              = md
         dt                      = 0.002
-        nsteps                  = 5000
+        nsteps                  = 50000000
         nstenergy               = 2000
         nstxout-compressed      = 10000
         nstvout                 = 0
@@ -96,11 +126,11 @@ def get_npt_mdp(id: Int = None, Temperature: Float = None, Pressure: Float = Non
         lincs_order             = 4
         tcoupl                  = v-rescale
         tc-grps                 = System
-        ref_t                   = {Temperature.value}
+        ref_t                   = {temperature.value}
         tau_t                   = 0.1
         pcoupl                  = c-rescale
         pcoupltype              = isotropic
-        ref_p                   = {Pressure.value}
+        ref_p                   = {pressure.value}
         tau_p                   = 2.0
         ;refcoord-scaling        = com
         compressibility         = 4.5e-5

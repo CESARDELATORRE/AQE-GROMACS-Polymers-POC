@@ -5,7 +5,7 @@ from aiida.engine import calcfunction
 @calcfunction
 def get_pdb(key: Int) -> Str:
     pdb_dict = Dict(dict={
-        '1': '14tPBMonomer.pdb',
+        '1': 'tPBMonomer.pdb',
         '2': 'PVAMonomer.pdb'
     }).store()
 

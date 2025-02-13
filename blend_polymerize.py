@@ -289,7 +289,7 @@ class PolymerizeWorkChain(WorkChain):
                 Float(dataframe_elements.loc[dataframe_elements['Symbol'] == \
                       iatom['element'], 'AtomicMass'].iloc[0])
                 polymer_all_atom_lines.append(get_pdbstr(iatom).value)
-                #print(get_pdbstr(iatom).value)
+                print(get_pdbstr(iatom).value)
         self.ctx.polymer = SinglefileData.from_string('\n'.join(polymer_all_atom_lines), filename='polymer.pdb')
 
     def result(self):

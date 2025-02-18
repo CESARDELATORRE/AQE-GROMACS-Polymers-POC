@@ -6,7 +6,9 @@ from aiida.engine import calcfunction
 def get_pdb(key: Int) -> Str:
     pdb_dict = Dict(dict={
         '1': 'tPBMonomer.pdb',
-        '2': 'PVAMonomer.pdb'
+        '2': 'PVAMonomer.pdb',
+        '3': 'PMAMonomer.pdb',
+        '4': 'cIPMonomer.pdb'
     }).store()
 
     result = Str(pdb_dict.get_dict().get(f'{key.value}', "Error: Polymer is not in the current database."))
@@ -23,7 +25,9 @@ def get_pdb(key: Int) -> Str:
 def get_connection_point(key: Int) -> List:
     connection_dict = Dict(dict={
         '1': ['CW', 'HW3', 'HA3', 'CA'],
-        '2': ['CB', 'HB2', 'HA3', 'CA']
+        '2': ['CB', 'HB2', 'HA3', 'CA'],
+        '3': ['CW', 'HW3', 'HA2', 'CA'],
+        '4': ['CW', 'HW3', 'HA3', 'CA']
     }).store()
 
     result = List(connection_dict.get_dict().get(f'{key.value}', "Error: Polymer is not in the current database."))

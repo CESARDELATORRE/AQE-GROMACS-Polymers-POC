@@ -2130,7 +2130,7 @@ HD23    opls_140     0.060      1
  [ MA2 ]   ; Repeating unit of Poly (methyl acrylate)
  [ atoms ] 
  CA   opls_137e   -0.06     1 
- HA   opls_140e    0.06     2
+ HA1  opls_140e    0.06     2
  CB   opls_465e    0.510    3
  OB   opls_466e   -0.430    4
  OG   opls_467e   -0.330    5
@@ -2143,7 +2143,7 @@ HD23    opls_140     0.060      1
  HW2  opls_140e    0.06    12
  [ bonds ]
  CA  -CW
- CA   HA
+ CA   HA1
  CA   CB
  CB   OB
  CB   OG
@@ -2160,7 +2160,7 @@ HD23    opls_140     0.060      1
  [ MA3 ]   ; Terminal2 of Poly (methyl acrylate)
  [ atoms ] 
  CA   opls_137e   -0.06     1 
- HA   opls_140e    0.06     2
+ HA1  opls_140e    0.06     2
  CB   opls_465e    0.510    3
  OB   opls_466e   -0.430    4
  OG   opls_467e   -0.330    5
@@ -2174,7 +2174,7 @@ HD23    opls_140     0.060      1
  HW3  opls_140e    0.06    13
  [ bonds ]
  CA  -CW
- CA   HA
+ CA   HA1
  CA   CB
  CB   OB
  CB   OG
@@ -3120,4 +3120,3 @@ HD23    opls_140     0.060      1
  CW  HW3 
  [ impropers ]
 CD  OZ  CE  OE  improper_O_C_X_Y 
-

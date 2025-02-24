@@ -164,18 +164,20 @@ def get_nvt_mdp(id: Int = None, temperature: Float = None) -> SinglefileData:
     return SinglefileData.from_string(mdp_str, filename=f'eqnvt-{id.value}.mdp')
 
 @calcfunction
-def get_npt_mdp(id: Int = None, temperature: Float = None, pressure: Float = None) -> SinglefileData:
+def get_npt_mdp(id: Int = None, temperature: Float = None, pressure: Float = None, dt: Float = None, nsteps: Int = None) -> SinglefileData:
     
     id = id if id is not None else Int(0)
     temperature = temperature if temperature is not None else Float(298.15)
     pressure = pressure if pressure is not None else Float(1.0)
+    dt = dt if dt is not None else Float(0.002)
+    nsteps = nsteps if nsteps is not None else Int(500000)
     
     mdp_str = f"""
         title                   = NPT Equilibration
         ;define                 = -DPOSRES
         integrator              = md
-        dt                      = 0.002
-        nsteps                  = 500000
+        dt                      = {dt.value}
+        nsteps                  = {nsteps.value}
         nstenergy               = 2000
         nstxout-compressed      = 10000
         nstvout                 = 0

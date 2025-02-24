@@ -82,7 +82,7 @@ def get_top(itp_fname_list: List, posre_fname_list: List, polymer_count_list: Li
     return SinglefileData.from_string('\n'.join(top_lines), filename='topol.top')
 
 @calcfunction
-def check_insert_molecules(log: SinglefileData, polymer_count: Int) -> Bool:
+def check_insert_molecules(log: SinglefileData, polymer_count: Int) -> Int:
     lines = log.get_content().split('\n')
     check_lines = [line for line in lines if line.startswith('Added')]
     
@@ -93,9 +93,9 @@ def check_insert_molecules(log: SinglefileData, polymer_count: Int) -> Bool:
     polymer_count_inserted = Int(wordlist[1])
     
     if polymer_count_inserted.value == polymer_count.value:
-        return Bool(False)
+        return polymer_count_inserted
     else:
-        return Bool(True)
+        return polymer_count_inserted
 
 @calcfunction
 def get_em_mdp() -> SinglefileData:
@@ -117,6 +117,51 @@ def get_em_mdp() -> SinglefileData:
         """,
         filename='em.mdp',
         )
+
+@calcfunction
+def get_nvt_mdp(id: Int = None, temperature: Float = None) -> SinglefileData:
+    
+    id = id if id is not None else Int(0)
+    temperature = temperature if temperature is not None else Float(298.15)
+    
+    mdp_str = f"""
+        title                   = NPT Equilibration
+        ;define                 = -DPOSRES
+        integrator              = md
+        dt                      = 0.002
+        nsteps                  = 50000
+        nstenergy               = 2000
+        nstxout-compressed      = 10000
+        nstvout                 = 0
+        nstlog                  = 1000
+        gen_vel                 = yes
+        gen_temp                = 298.15
+        pbc                     = xyz
+        cutoff-scheme           = Verlet
+        rlist                   = 1.0
+        ns_type                 = grid
+        nstlist                 = 10
+        coulombtype             = PME
+        fourierspacing          = 0.12
+        pme_order               = 4
+        rcoulomb                = 1.0
+        vdwtype                 = Cut-Off
+        rvdw                    = 1.0
+        DispCorr                = EnerPres
+        constraints             = h-bonds
+        constraint_algorithm    = lincs
+        lincs_iter              = 1
+        lincs_order             = 4
+        tcoupl                  = v-rescale
+        tc-grps                 = System
+        ref_t                   = {temperature.value}
+        tau_t                   = 0.1
+        pcoupl                  = no
+        ;refcoord-scaling        = com
+        compressibility         = 4.5e-5
+        """
+    
+    return SinglefileData.from_string(mdp_str, filename=f'eqnvt-{id.value}.mdp')
 
 @calcfunction
 def get_npt_mdp(id: Int = None, temperature: Float = None, pressure: Float = None) -> SinglefileData:

@@ -175,7 +175,7 @@ def get_npt_mdp(id: Int = None, temperature: Float = None, pressure: Float = Non
         ;define                 = -DPOSRES
         integrator              = md
         dt                      = 0.002
-        nsteps                  = 50000
+        nsteps                  = 500000
         nstenergy               = 2000
         nstxout-compressed      = 10000
         nstvout                 = 0

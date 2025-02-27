@@ -3120,3 +3120,148 @@ HD23    opls_140     0.060      1
  CW  HW3 
  [ impropers ]
 CD  OZ  CE  OE  improper_O_C_X_Y 
+
+;;;Polystyrene
+[ JS1 ]
+    [ atoms ]
+    CA   opls_135   -0.180   1
+    HA1  opls_140    0.060   1
+    HA2  opls_140    0.060   1
+    HA3  opls_140    0.060   1
+    CB   opls_515    0.055   1
+    HB1  opls_140    0.060   1
+    CG   opls_145   -0.115   1
+    CD1  opls_145   -0.115   1
+    HD1  opls_146    0.115   1
+    CD2  opls_145   -0.115   1
+    HD2  opls_146    0.115   1
+    CE1  opls_145   -0.115   1
+    HE1  opls_146    0.115   1
+    CE2  opls_145   -0.115   1
+    HE2  opls_146    0.115   1
+    CZ   opls_145   -0.115   1
+    HZ   opls_146    0.115   1
+
+    [ bonds ]
+    CA    HA1
+    CA    HA2
+    CA    HA3
+    CA    CB
+    CB    HB1
+    CB    CG
+    CG    CD1
+    CD1   HD1
+    CD1   CE1
+    CE1   HE1
+    CE1   CZ
+    CG    CD2
+    CD2   HD2
+    CD2   CE2
+    CE2   HE2
+    CE2   CZ
+    CZ    HZ
+    CB   +CA
+
+    [ impropers ]
+    CG     CE2    CD2      HD2       improper_Z_N_X_Y 
+    CD2    CZ     CE2      HE2       improper_Z_N_X_Y 
+    CE1    CE2    CZ       HZ        improper_Z_N_X_Y 
+    CD1    CZ     CE1      HE1       improper_Z_N_X_Y 
+    CG     CE1    CD1      HD1       improper_Z_N_X_Y 
+    CD1    CD2    CG       CB        improper_Z_N_X_Y 
+
+[ JS2 ]
+    [ atoms ]
+    CA   opls_136   -0.120   1
+    HA1  opls_140    0.060   1
+    HA2  opls_140    0.060   1
+    CB   opls_515    0.055   1
+    HB1  opls_140    0.060   1
+    CG   opls_145   -0.115   1
+    CD1  opls_145   -0.110   1
+    HD1  opls_146    0.110   1
+    CD2  opls_145   -0.110   1
+    HD2  opls_146    0.110   1
+    CE1  opls_145   -0.110   1
+    HE1  opls_146    0.110   1
+    CE2  opls_145   -0.110   1
+    HE2  opls_146    0.110   1
+    CZ   opls_145   -0.110   1
+    HZ   opls_146    0.110   1
+
+    [ bonds ]
+    CA    HA1
+    CA    HA2
+    CA    CB
+    CB    HB1
+    CB    CG
+    CG    CD1
+    CD1   HD1
+    CD1   CE1
+    CE1   HE1
+    CE1   CZ
+    CG    CD2
+    CD2   HD2
+    CD2   CE2
+    CE2   HE2
+    CE2   CZ
+    CZ    HZ
+    CB   +CA
+    CA   -CB
+
+    [ impropers ]
+    CG     CE2    CD2      HD2       improper_Z_N_X_Y 
+    CD2    CZ     CE2      HE2       improper_Z_N_X_Y 
+    CE1    CE2    CZ       HZ        improper_Z_N_X_Y 
+    CD1    CZ     CE1      HE1       improper_Z_N_X_Y 
+    CG     CE1    CD1      HD1       improper_Z_N_X_Y 
+    CD1    CD2    CG       CB        improper_Z_N_X_Y 
+
+
+[ JS3 ]
+    [ atoms ]
+    CA   opls_136   -0.120   1
+    HA1  opls_140    0.060   1
+    HA2  opls_140    0.060   1
+    CB   opls_149   -0.005   1
+    HB1  opls_140    0.060   1
+    HB2  opls_140    0.060   1
+    CG   opls_145   -0.115   1
+    CD1  opls_145   -0.110   1
+    HD1  opls_146    0.110   1
+    CD2  opls_145   -0.110   1
+    HD2  opls_146    0.110   1
+    CE1  opls_145   -0.110   1
+    HE1  opls_146    0.110   1
+    CE2  opls_145   -0.110   1
+    HE2  opls_146    0.110   1
+    CZ   opls_145   -0.110   1
+    HZ   opls_146    0.110   1
+
+    [ bonds ]
+    CA    HA1
+    CA    HA2
+    CA    CB
+    CB    HB1
+    CB    HB2
+    CB    CG
+    CG    CD1
+    CD1   HD1
+    CD1   CE1
+    CE1   HE1
+    CE1   CZ
+    CG    CD2
+    CD2   HD2
+    CD2   CE2
+    CE2   HE2
+    CE2   CZ
+    CZ    HZ
+    CA   -CB
+
+    [ impropers ]
+    CG     CE2    CD2      HD2       improper_Z_N_X_Y 
+    CD2    CZ     CE2      HE2       improper_Z_N_X_Y 
+    CE1    CE2    CZ       HZ        improper_Z_N_X_Y 
+    CD1    CZ     CE1      HE1       improper_Z_N_X_Y 
+    CG     CE1    CD1      HD1       improper_Z_N_X_Y 
+    CD1    CD2    CG       CB        improper_Z_N_X_Y 
